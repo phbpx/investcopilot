@@ -10,8 +10,9 @@ import (
 type Performance struct {
 	TotalInvested  float64
 	CurrentValue   float64
-	AbsoluteReturn float64
-	PercentReturn  float64
+	TotalIncome    float64 // accumulated proventos (dividends, FII rendimentos, JCP)
+	AbsoluteReturn float64 // (current_value + income) - invested
+	PercentReturn  float64 // absolute_return / invested
 
 	// Period returns — nil when historical data is unavailable.
 	Return1M  *float64
@@ -25,9 +26,10 @@ type HistoricalPriceFn func(ticker string, date time.Time) (float64, bool)
 
 // Calculate computes performance metrics for the portfolio.
 // histPrices is optional — pass nil to skip period return calculations.
-func Calculate(txs []portfolio.Transaction, currentValue float64, histPrices HistoricalPriceFn) *Performance {
+func Calculate(txs []portfolio.Transaction, currentValue float64, totalIncome float64, histPrices HistoricalPriceFn) *Performance {
 	p := &Performance{
 		CurrentValue: currentValue,
+		TotalIncome:  totalIncome,
 	}
 
 	// net invested = sum(BUY cost) - sum(SELL proceeds)
@@ -40,7 +42,8 @@ func Calculate(txs []portfolio.Transaction, currentValue float64, histPrices His
 		}
 	}
 
-	p.AbsoluteReturn = currentValue - p.TotalInvested
+	// total return includes income received (dividends, FII rendimentos, JCP)
+	p.AbsoluteReturn = (currentValue + totalIncome) - p.TotalInvested
 	if p.TotalInvested > 0 {
 		p.PercentReturn = (p.AbsoluteReturn / p.TotalInvested) * 100
 	}
@@ -58,15 +61,13 @@ func Calculate(txs []portfolio.Transaction, currentValue float64, histPrices His
 }
 
 // periodReturn calculates the money-weighted return for a period [start, end].
-// It reconstructs the portfolio at `start`, values it with historical prices,
-// then computes return accounting for contributions made during the period.
+// Includes income received during the period in the numerator.
 func periodReturn(
 	txs []portfolio.Transaction,
 	currentValue float64,
 	histPrices HistoricalPriceFn,
 	start, end time.Time,
 ) *float64 {
-	// reconstruct holdings at start of period
 	type holding struct {
 		qty       float64
 		costBasis float64
@@ -95,7 +96,6 @@ func periodReturn(
 		}
 	}
 
-	// value the portfolio at start using historical prices
 	startValue := 0.0
 	for ticker, h := range holdings {
 		if h.qty <= 0 {
@@ -103,7 +103,7 @@ func periodReturn(
 		}
 		price, ok := histPrices(ticker, start)
 		if !ok {
-			return nil // can't compute without all prices
+			return nil
 		}
 		startValue += h.qty * price
 	}
@@ -112,8 +112,9 @@ func periodReturn(
 		return nil
 	}
 
-	// net contributions made during the period
+	// net contributions and income received during the period
 	netContributions := 0.0
+	periodIncome := 0.0
 	for _, tx := range txs {
 		if tx.Date.Before(start) || tx.Date.After(end) {
 			continue
@@ -123,16 +124,18 @@ func periodReturn(
 			netContributions += tx.Quantity*tx.Price + tx.Fees
 		case portfolio.Sell:
 			netContributions -= tx.Quantity*tx.Price - tx.Fees
+		case portfolio.Income:
+			periodIncome += tx.Price - tx.Fees
 		}
 	}
 
-	// simple return adjusted for contributions
-	// r = (end_value - start_value - contributions) / (start_value + contributions/2)
+	// modified Dietz: income is treated as a cash inflow at the end
+	// r = (end_value + income - start_value - contributions) / (start_value + contributions/2)
 	denominator := startValue + netContributions/2
 	if denominator <= 0 {
 		return nil
 	}
 
-	ret := ((currentValue - startValue - netContributions) / denominator) * 100
+	ret := ((currentValue + periodIncome - startValue - netContributions) / denominator) * 100
 	return &ret
 }

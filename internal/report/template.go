@@ -195,6 +195,7 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border
         <th class="right">Preço Médio</th>
         <th class="right">Preço Atual</th>
         <th class="right">Valor</th>
+        {{ if gt .Portfolio.TotalIncome 0.0 }}<th class="right">Proventos</th>{{ end }}
         <th class="right">Alocação</th>
       </tr>
     </thead>
@@ -207,6 +208,9 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border
         <td class="right mono">R$ {{ printf "%.2f" .AvgPrice }}</td>
         <td class="right mono">R$ {{ printf "%.2f" .CurrentPrice }}</td>
         <td class="right mono">R$ {{ brl .CurrentValue }}</td>
+        {{ if gt $.Portfolio.TotalIncome 0.0 }}
+        <td class="right mono positive">{{ if gt .TotalIncome 0.0 }}R$ {{ brl .TotalIncome }}{{ else }}—{{ end }}</td>
+        {{ end }}
         <td class="right mono">{{ printf "%.1f%%" .Allocation }}</td>
       </tr>
       {{ end }}
@@ -272,6 +276,13 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border
       </div>
       <div class="sub">sobre capital investido</div>
     </div>
+    {{ if gt .Performance.TotalIncome 0.0 }}
+    <div class="perf-card green">
+      <div class="label">Proventos Recebidos</div>
+      <div class="card-value">R$ {{ brl .Performance.TotalIncome }}</div>
+      <div class="sub">dividendos, rendimentos FII, JCP</div>
+    </div>
+    {{ end }}
     {{ if .Performance.Return12M }}
     <div class="perf-card">
       <div class="label">Retorno 12m</div>

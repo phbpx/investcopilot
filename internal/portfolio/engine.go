@@ -14,6 +14,7 @@ type Position struct {
 	AvgPrice     float64 // average cost basis
 	CurrentPrice float64
 	CurrentValue float64
+	TotalIncome  float64 // accumulated dividends / FII rendimentos / JCP (net of taxes)
 	Allocation   float64 // % of total portfolio
 }
 
@@ -21,6 +22,7 @@ type Position struct {
 type Portfolio struct {
 	Positions       []*Position
 	TotalValue      float64
+	TotalIncome     float64
 	ClassAllocation map[AssetClass]float64 // % per class
 }
 
@@ -30,8 +32,9 @@ type PriceSource func(tickers []string) (map[string]float64, error)
 // Build consolidates transactions into a Portfolio using the given price source.
 func Build(txs []Transaction, cfg *Config, prices PriceSource) (*Portfolio, error) {
 	type state struct {
-		quantity float64
-		costBasis float64 // total cost (quantity * avg price + fees)
+		quantity    float64
+		costBasis   float64 // total cost (quantity * avg price + fees)
+		totalIncome float64 // accumulated proventos net of taxes
 	}
 
 	holdings := make(map[string]*state)
@@ -45,17 +48,18 @@ func Build(txs []Transaction, cfg *Config, prices PriceSource) (*Portfolio, erro
 
 		switch tx.Type {
 		case Buy:
-			totalCost := tx.Quantity*tx.Price + tx.Fees
-			s.costBasis += totalCost
+			s.costBasis += tx.Quantity*tx.Price + tx.Fees
 			s.quantity += tx.Quantity
 		case Sell:
 			if tx.Quantity > s.quantity {
 				return nil, fmt.Errorf("ticker %s: selling %.2f but only have %.2f", tx.Ticker, tx.Quantity, s.quantity)
 			}
-			// reduce cost basis proportionally
 			ratio := tx.Quantity / s.quantity
 			s.costBasis -= s.costBasis * ratio
 			s.quantity -= tx.Quantity
+		case Income:
+			// price = total received, fees = IR withheld
+			s.totalIncome += tx.Price - tx.Fees
 		}
 	}
 
@@ -102,16 +106,28 @@ func Build(txs []Transaction, cfg *Config, prices PriceSource) (*Portfolio, erro
 			AvgPrice:     avgPrice,
 			CurrentPrice: price,
 			CurrentValue: value,
+			TotalIncome:  s.totalIncome,
 		})
 	}
 
-	// calculate allocations
+	// calculate allocations and total income
 	classAllocation := make(map[AssetClass]float64)
+	totalIncome := 0.0
 	for _, p := range positions {
 		if totalValue > 0 {
 			p.Allocation = (p.CurrentValue / totalValue) * 100
 		}
 		classAllocation[p.Class] += p.Allocation
+		totalIncome += p.TotalIncome
+	}
+
+	// also count income from fully sold positions
+	for ticker, s := range holdings {
+		if s.quantity == 0 && s.totalIncome > 0 {
+			// already sold — income still counts but position not shown
+			_ = ticker
+			totalIncome += s.totalIncome
+		}
 	}
 
 	// sort positions by value descending
@@ -122,6 +138,7 @@ func Build(txs []Transaction, cfg *Config, prices PriceSource) (*Portfolio, erro
 	return &Portfolio{
 		Positions:       positions,
 		TotalValue:      totalValue,
+		TotalIncome:     totalIncome,
 		ClassAllocation: classAllocation,
 	}, nil
 }

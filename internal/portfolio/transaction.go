@@ -8,12 +8,13 @@ import (
 	"time"
 )
 
-// TransactionType represents a buy or sell operation.
+// TransactionType represents a portfolio operation.
 type TransactionType string
 
 const (
-	Buy  TransactionType = "BUY"
-	Sell TransactionType = "SELL"
+	Buy    TransactionType = "BUY"
+	Sell   TransactionType = "SELL"
+	Income TransactionType = "INCOME" // dividends, FII rendimentos, JCP
 )
 
 // Transaction represents a single buy or sell event.
@@ -74,8 +75,8 @@ func LoadTransactions(path string) ([]Transaction, error) {
 		}
 
 		txType := TransactionType(row[2])
-		if txType != Buy && txType != Sell {
-			return nil, fmt.Errorf("row %d: invalid type %q (expected BUY or SELL)", i+2, row[2])
+		if txType != Buy && txType != Sell && txType != Income {
+			return nil, fmt.Errorf("row %d: invalid type %q (expected BUY, SELL or INCOME)", i+2, row[2])
 		}
 
 		txs = append(txs, Transaction{
