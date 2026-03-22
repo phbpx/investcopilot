@@ -8,7 +8,14 @@
       "Bash(go get:*)",
       "Bash(go build:*)",
       "Bash(go doc:*)",
-      "Bash(go run:*)"
+      "Bash(go run:*)",
+      "Bash(curl -s \"https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados/ultimos/90?formato=json\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(type\\(d\\), str\\(d\\)[:200]\\)\")",
+      "Bash(curl -s \"https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados/ultimos/20?formato=json\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(d[0], d[-1], len\\(d\\)\\)\")",
+      "Bash(curl -s \"https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados?dataInicial=01/09/2025&dataFinal=29/04/2026&formato=json\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); uniq=list\\(dict.fromkeys\\(r[''''valor''''] for r in d\\)\\); print\\(uniq\\)\")",
+      "Bash(curl:*)"
     ]
   }
 }
