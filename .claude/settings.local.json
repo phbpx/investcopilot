@@ -15,7 +15,9 @@
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(d[0], d[-1], len\\(d\\)\\)\")",
       "Bash(curl -s \"https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados?dataInicial=01/09/2025&dataFinal=29/04/2026&formato=json\")",
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); uniq=list\\(dict.fromkeys\\(r[''''valor''''] for r in d\\)\\); print\\(uniq\\)\")",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Read(//private/tmp/**)",
+      "Bash(open /tmp/report.html)"
     ]
   }
 }
