@@ -1,0 +1,46 @@
+target_allocation:
+  renda_fixa: 30
+  equities_br: 25
+  equities_global: 20
+  real_estate: 15
+  commodities: 10
+
+risk_rules:
+  max_single_asset: 20
+  max_top3: 50
+  max_sector: 35
+
+assets:
+  PETR4:
+    class: equities_br
+    sector: energia
+  VALE3:
+    class: equities_br
+    sector: mineracao
+  BOVA11:
+    class: equities_br
+    sector: diversificado
+  IVVB11:
+    class: equities_global
+    sector: diversificado
+  MXRF11:
+    class: real_estate
+    sector: papeis
+  GOLD11:
+    class: commodities
+    sector: ouro
+  TESOURO_SELIC:
+    class: renda_fixa
+    sector: soberano
+
+market:
+  # brapi_token: seu-token-aqui  # obtenha gratuitamente em brapi.dev
+  # preços manuais para uso offline ou ativos não listados na brapi
+  manual_prices:
+    PETR4: 41.20
+    VALE3: 65.80
+    BOVA11: 118.50
+    IVVB11: 325.00
+    MXRF11: 9.85
+    GOLD11: 48.30
+    TESOURO_SELIC: 5350.00
