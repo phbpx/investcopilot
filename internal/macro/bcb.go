@@ -132,13 +132,13 @@ func fetchFocusExpectation(indicator string, year int) (float64, error) {
 
 	resp, err := httpClient.Get(u) //nolint:gosec
 	if err != nil {
-		return 0, fmt.Errorf("Focus API %s: %w", indicator, err)
+		return 0, fmt.Errorf("focus API %s: %w", indicator, err)
 	}
 	defer resp.Body.Close()
 
 	var env focusEnvelope
 	if err := json.NewDecoder(resp.Body).Decode(&env); err != nil {
-		return 0, fmt.Errorf("Focus API decode: %w", err)
+		return 0, fmt.Errorf("focus API decode: %w", err)
 	}
 	if len(env.Value) == 0 {
 		return 0, fmt.Errorf("no Focus data for %s %d", indicator, year)
