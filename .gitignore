@@ -1,0 +1,15 @@
+# Binaries
+investcopilot
+*.exe
+
+# Go
+vendor/
+
+# Reports
+*.html
+
+# Environment
+.env
+
+# OS
+.DS_Store
