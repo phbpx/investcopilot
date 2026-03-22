@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"strconv"
 	"time"
 )
@@ -122,9 +123,11 @@ type focusEnvelope struct {
 // fetchFocusExpectation returns the latest median expectation for an indicator/year.
 func fetchFocusExpectation(indicator string, year int) (float64, error) {
 	filter := fmt.Sprintf("Indicador eq '%s' and DataReferencia eq '%d'", indicator, year)
+	// OData requires %20 for spaces; url.QueryEscape uses + which the BCB API rejects.
+	encoded := strings.NewReplacer("+", "%20").Replace(url.QueryEscape(filter))
 	u := fmt.Sprintf(
-		"%s/ExpectativasMercadoAnuais?$filter=%s&$orderby=Data desc&$top=1&$format=json&$select=Indicador,Data,DataReferencia,Mediana",
-		focusBase, url.QueryEscape(filter),
+		"%s/ExpectativasMercadoAnuais?$filter=%s&$orderby=Data%%20desc&$top=1&$format=json&$select=Indicador,Data,DataReferencia,Mediana",
+		focusBase, encoded,
 	)
 
 	resp, err := httpClient.Get(u) //nolint:gosec

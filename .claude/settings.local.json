@@ -17,7 +17,12 @@
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); uniq=list\\(dict.fromkeys\\(r[''''valor''''] for r in d\\)\\); print\\(uniq\\)\")",
       "Bash(curl:*)",
       "Read(//private/tmp/**)",
-      "Bash(open /tmp/report.html)"
+      "Bash(open /tmp/report.html)",
+      "Read(//Users/phbpx/.investcopilot/**)",
+      "Bash(sqlite3 ~/.investcopilot/cache.db \"SELECT key, value_num, value_txt, fetched_at FROM macro_cache;\")",
+      "Bash(sqlite3 ~/.investcopilot/cache.db \"SELECT key, ROUND\\(value_num,4\\), value_txt FROM macro_cache;\")",
+      "Bash(sqlite3 ~/.investcopilot/cache.db \"SELECT COUNT\\(*\\), MIN\\(date\\), MAX\\(date\\) FROM price_cache;\")",
+      "Bash(sqlite3:*)"
     ]
   }
 }
