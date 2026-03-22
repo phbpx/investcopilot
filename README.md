@@ -1,10 +1,10 @@
 # Investment Copilot
 
-A CLI tool for structured, data-driven investment decision-making.
+Uma ferramenta de linha de comando para apoio à decisão de investimentos, estruturada e orientada por dados.
 
-Investment Copilot does not try to predict the market. It measures risk, identifies concentration, interprets macro context, applies explicit rules, and suggests actions.
+O Investment Copilot não tenta prever o mercado. Ele mede risco, identifica concentração, interpreta o contexto macro, aplica regras explícitas e sugere ações.
 
-## Overview
+## Visão Geral
 
 ```
 $ investcopilot analyze -t transactions.csv -c config.yaml -a 2000
@@ -76,9 +76,9 @@ $ investcopilot analyze -t transactions.csv -c config.yaml -a 2000
   Evitar: equities_br — acima do target
 ```
 
-## Engines
+## Módulos
 
-| Engine | O que faz |
+| Módulo | O que faz |
 |--------|-----------|
 | **Portfolio** | Consolida transações, calcula posição (preço médio, valor atual, alocação %) |
 | **Risk** | Mede concentração por ativo e classe, detecta desvios do target |
@@ -197,7 +197,7 @@ date,ticker,type,quantity,price,fees
 |-------|---------|-----------|
 | `date` | `YYYY-MM-DD` | Data da transação |
 | `ticker` | string | Código do ativo |
-| `type` | `BUY` ou `SELL` | Tipo da operação |
+| `type` | `BUY`, `SELL` ou `INCOME` | Tipo da operação |
 | `quantity` | decimal | Quantidade |
 | `price` | decimal | Preço unitário (BRL) |
 | `fees` | decimal | Corretagem e taxas (BRL) |
@@ -243,6 +243,6 @@ rm ~/.investcopilot/cache.db
 - [x] Report Engine (HTML export)
 - [x] Cache persistido (SQLite)
 
-## License
+## Licença
 
 MIT
