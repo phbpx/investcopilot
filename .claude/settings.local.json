@@ -22,7 +22,12 @@
       "Bash(sqlite3 ~/.investcopilot/cache.db \"SELECT key, value_num, value_txt, fetched_at FROM macro_cache;\")",
       "Bash(sqlite3 ~/.investcopilot/cache.db \"SELECT key, ROUND\\(value_num,4\\), value_txt FROM macro_cache;\")",
       "Bash(sqlite3 ~/.investcopilot/cache.db \"SELECT COUNT\\(*\\), MIN\\(date\\), MAX\\(date\\) FROM price_cache;\")",
-      "Bash(sqlite3:*)"
+      "Bash(sqlite3:*)",
+      "Bash(make lint:*)",
+      "Bash(git push:*)",
+      "Bash(make all:*)",
+      "Bash(wc -l /Users/phbpx/Sources/investcopilot/internal/*/*.go)",
+      "Bash(ls:*)"
     ]
   }
 }

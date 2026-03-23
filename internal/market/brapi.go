@@ -34,11 +34,32 @@ type brapiResponse struct {
 
 // GetPrices fetches current prices for the given tickers.
 // Returns a map of ticker → price.
+// If the batch request fails, falls back to fetching one ticker at a time.
 func (c *Client) GetPrices(tickers []string) (map[string]float64, error) {
 	if len(tickers) == 0 {
 		return map[string]float64{}, nil
 	}
 
+	prices, err := c.fetchBatch(tickers)
+	if err == nil {
+		return prices, nil
+	}
+
+	// batch failed — fall back to one-by-one to identify the problematic ticker
+	prices = make(map[string]float64, len(tickers))
+	for _, ticker := range tickers {
+		p, err := c.fetchBatch([]string{ticker})
+		if err != nil {
+			return nil, fmt.Errorf("ticker %s: %w", ticker, err)
+		}
+		for k, v := range p {
+			prices[k] = v
+		}
+	}
+	return prices, nil
+}
+
+func (c *Client) fetchBatch(tickers []string) (map[string]float64, error) {
 	url := brapiBaseURL + strings.Join(tickers, ",")
 	if c.token != "" {
 		url += "?token=" + c.token
@@ -66,6 +87,5 @@ func (c *Client) GetPrices(tickers []string) (map[string]float64, error) {
 	for _, r := range result.Results {
 		prices[r.Symbol] = r.RegularMarketPrice
 	}
-
 	return prices, nil
 }
